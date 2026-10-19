@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  const SITE_VERSION = 'v1.0';
+  const SITE_VERSION = 'v1.1';
   const SUPPORTED_SCHEMA = 1;
   let CFG = null;         // config.json
   let DATA = null;        // season data (contract v1)
@@ -195,7 +195,7 @@
         ${o.full ? `<th class="c d-only">Wins</th><th class="c d-only">Top 5</th><th class="c d-only">Top 10</th><th class="c d-only">Poles</th>
         <th class="c d-only">Stage</th><th class="c d-only">Bonus</th>${seed ? '<th class="c d-only">Seed</th>' : ''}` : '<th class="c d-only">Wins</th>'}</tr></thead>
       <tbody>${list.map((d) => `<tr class="${d.pos === 1 ? 'lead' : ''}">
-        <td class="c pos num">${d.pos}</td><td>${carTag(d.car)}</td>
+        <td class="c pos"><span class="pb num">${d.pos}</span></td><td>${carTag(d.car)}</td>
         <td class="who">${driverLink(d.name, d.custId)}<span class="team-sub">${esc(d.team || '')}</span></td>
         <td class="d-only">${esc(d.team || '')}</td>
         <td class="r pts num">${d.points}</td><td class="r num">${behind(d.behind)}</td>
@@ -212,7 +212,7 @@
       <thead><tr><th class="c">Pos</th><th>#</th><th>Driver</th><th class="d-only">Team</th>${full ? `<th class="c d-only">Seed</th>
         <th class="r d-only">Reset</th><th class="r d-only">Chase Pts</th>` : ''}<th class="r">Total</th><th class="r">Behind</th>${full ? '<th class="c d-only">Wins</th>' : ''}</tr></thead>
       <tbody>${list.map((c) => `<tr class="${c.pos === 1 ? 'lead' : ''}">
-        <td class="c pos num">${c.pos}</td><td>${carTag(c.car)}</td>
+        <td class="c pos"><span class="pb num">${c.pos}</span></td><td>${carTag(c.car)}</td>
         <td class="who">${driverLink(c.name, c.custId)}<span class="team-sub">${esc(c.team || '')} · Seed ${c.seed}</span></td>
         <td class="d-only">${esc(c.team || '')}</td>${full ? `<td class="c d-only num">${c.seed}</td>
         <td class="r d-only num">${c.resetPts}</td><td class="r d-only num">${c.chasePts}</td>` : ''}
@@ -224,7 +224,7 @@
       <thead><tr><th class="c">Pos</th><th>Team</th><th class="r">Pts</th><th class="r">Behind</th><th class="c">Wins</th>
         <th class="c d-only">Top 5s</th><th class="c d-only">Races</th></tr></thead>
       <tbody>${rows.map((t) => `<tr class="${t.pos === 1 ? 'lead' : ''}">
-        <td class="c pos num">${t.pos}</td><td class="who">${esc(t.team)}</td><td class="r pts num">${t.points}</td>
+        <td class="c pos"><span class="pb num">${t.pos}</span></td><td class="who">${esc(t.team)}</td><td class="r pts num">${t.points}</td>
         <td class="r num">${behind(t.behind)}</td><td class="c num">${t.wins}</td>
         <td class="c d-only num">${t.top5}</td><td class="c d-only num">${t.races}</td></tr>`).join('')}</tbody></table></div>`;
   }
@@ -266,7 +266,7 @@
       lastCard = `<div class="card"><div class="card-head"><h2>Last race</h2><a href="#/race/${esc(last.race)}">Full results →</a></div>
         <div style="padding-top:6px"><div class="eyebrow">${raceLabel(last.race)} · ${shortDate(last.date)}</div>
         <div style="font-weight:700;font-size:18px;margin:2px 0 8px">${esc(last.track || '')}</div></div>
-        <table class="tbl"><tbody>${top.map((r) => `<tr><td class="c pos num">${r.fin}</td><td>${carTag(r.car)}</td>
+        <table class="tbl"><tbody>${top.map((r) => `<tr class="${r.fin === 1 ? 'lead' : ''}"><td class="c pos"><span class="pb num">${r.fin}</span></td><td>${carTag(r.car)}</td>
           <td class="who">${driverLink(r.driver, r.custId)}</td><td class="r num">${r.total != null ? r.total + ' pts' : ''}</td></tr>`).join('')}</tbody></table></div>`;
     }
 
@@ -366,7 +366,7 @@
     tile('Incidents', sm.incidents ? `${sm.incidents.total} total <small>${sm.incidents.avg} avg · ${plural(sm.incidents.zeroX.length, 'driver')} 0x</small>` : '');
 
     const rows = r.results.map((x) => `<tr class="${x.fin === 1 ? 'lead' : ''}">
-      <td class="c pos num">${x.fin}</td><td>${carTag(x.car)}</td>
+      <td class="c pos"><span class="pb num">${x.fin}</span></td><td>${carTag(x.car)}</td>
       <td class="who">${driverLink(x.driver, x.custId)}<span class="team-sub">${esc(x.team || '')}</span></td>
       <td class="d-only">${esc(x.team || '')}</td><td class="c d-only num">${n(x.start)}</td><td class="c num">${gainCell(x.gain)}</td>
       <td class="c d-only num">${x.laps}</td><td class="c num">${x.led}</td><td class="r d-only num">${n(x.interval)}</td>
@@ -430,9 +430,9 @@
       const cls = !res ? 'dns' : res.fin === 1 ? 'win' : res.fin <= 5 ? 't5' : res.fin <= 10 ? 't10' : '';
       return `<a class="fin ${cls}" href="#/race/${esc(no)}" title="${esc(race.track || '')}"><b class="num">${res ? res.fin : '–'}</b><span>${raceLabel(no)}</span></a>`;
     }).join('');
-    const logRows = log.slice().reverse().map(({ race, res }) => `<tr><td><a href="#/race/${esc(race.race)}">${raceLabel(race.race)}</a></td>
+    const logRows = log.slice().reverse().map(({ race, res }) => `<tr class="${res.fin === 1 ? 'lead' : ''}"><td><a href="#/race/${esc(race.race)}">${raceLabel(race.race)}</a></td>
       <td>${esc(race.track || '')}<span class="team-sub">${shortDate(race.date)}</span></td><td class="d-only">${shortDate(race.date)}</td>
-      <td class="c num">${n(res.start)}</td><td class="c pos num">${res.fin}</td><td class="c num">${res.led}</td><td class="c num">${n(res.inc)}</td>
+      <td class="c num">${n(res.start)}</td><td class="c pos"><span class="pb num">${res.fin}</span></td><td class="c num">${res.led}</td><td class="c num">${n(res.inc)}</td>
       <td class="d-only">${n(res.status)}</td><td class="r pts num">${n(res.total)}</td></tr>`).join('');
 
     return `<div class="race-nav"><a href="#/drivers">← All drivers</a><span></span></div>
@@ -441,8 +441,8 @@
         <div class="chips">${chips.join('')}</div></div>
       <div class="card"><div class="card-head"><h2>Season stats</h2></div><div class="stat-grid" style="padding-top:8px">${statsHtml}</div></div>
       <div class="card"><div class="card-head"><h2>Finishes by race</h2></div><div class="finishes">${chipsHtml}</div>
-        <div class="legend"><span><i style="background:var(--red)"></i>Win</span><span><i style="background:var(--navy)"></i>Top 5</span>
-        <span><i style="background:#dfe5f1"></i>Top 10</span><span><i style="border:1px dashed var(--muted)"></i>Didn't race</span></div></div>
+        <div class="legend"><span><i style="background:var(--red)"></i>Win</span><span><i style="background:#c9d2e6"></i>Top 5</span>
+        <span><i style="background:var(--raise)"></i>Top 10</span><span><i style="border:1px dashed var(--muted)"></i>Didn't race</span></div></div>
       ${logRows ? `<div class="card"><div class="card-head"><h2>Race by race</h2></div><div class="table-scroll"><table class="tbl">
         <thead><tr><th>Race</th><th>Track</th><th class="d-only">Date</th><th class="c">Start</th><th class="c">Fin</th><th class="c">Led</th><th class="c">Inc</th>
         <th class="d-only">Status</th><th class="r">Pts</th></tr></thead><tbody>${logRows}</tbody></table></div></div>` : ''}`;
