@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  const SITE_VERSION = 'v1.2';
+  const SITE_VERSION = 'v1.3';
   const SUPPORTED_SCHEMA = 1;
   let CFG = null;         // config.json
   let DATA = null;        // season data (contract v1)
@@ -185,6 +185,80 @@
   const postedRaces = () => Object.keys(DATA.races || {}).sort((a, b) => Number(a) - Number(b));
   const scheduleRow = (no) => (DATA.schedule || []).find((s) => s.race === String(no));
 
+  // ------------------------------------------------------------------ CSV export
+  const DL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 20h16"/></svg>';
+  const exportBtn = (key, label) => `<button type="button" class="btn" data-export="${esc(key)}">${DL_ICON}${esc(label)}</button>`;
+  const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const csvCell = (v) => { const s = v == null ? '' : String(v); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  function downloadCsv(name, header, rows) {
+    const text = [header].concat(rows).map((r) => r.map(csvCell).join(',')).join('\r\n');
+    const blob = new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' });   // BOM so Excel reads accents correctly
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = [slug(S().name) || 'season', name].join('-') + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  const STAT_HEAD = ['Car', 'Driver', 'Team', 'Pos', 'Points', 'Starts', 'Wins', 'Top 5', 'Top 10', 'Poles', 'Avg Start', 'Avg Finish',
+    'Best Finish', 'Laps', 'Laps Led', 'Races Led', 'Stage Wins', 'Stage Top 10s', 'Incidents', 'Inc / Race', '0x Races', 'DNFs'];
+  function statRow(s) {
+    const st = (DATA.standings.drivers || []).find((d) => d.custId === s.custId) || {};
+    return [s.car, s.name, s.team, st.pos, st.points, s.starts, s.wins, s.top5, s.top10, s.poles, s.avgStart, s.avgFinish, s.bestFinish,
+      s.laps, s.lapsLed, s.racesLed, s.stageWins, s.stageTop10s, s.incidents, s.incPerRace, s.zeroXRaces, s.dnfs];
+  }
+  const EXPORTS = {
+    'standings-season': () => {
+      const seed = S().chase && S().chase.on;
+      downloadCsv(chaseStatus() === 'live' ? 'standings-full-season' : 'standings',
+        ['Pos', 'Car', 'Driver', 'Team', 'Points', 'Behind', 'Wins', 'Top 5', 'Top 10', 'Poles', 'Stage Pts', 'Bonus Pts'].concat(seed ? ['Seed'] : []),
+        DATA.standings.drivers.map((d) => [d.pos, d.car, d.name, d.team, d.points, d.behind, d.wins, d.top5, d.top10, d.poles, d.stagePts, d.bonusPts]
+          .concat(seed ? [d.seed] : [])));
+    },
+    'standings-chase': () => downloadCsv(chaseStatus() === 'live' ? 'chase-standings' : 'chase-seeding-projected',
+      ['Pos', 'Car', 'Driver', 'Team', 'Seed', 'Reset Pts', 'Chase Pts', 'Total', 'Behind', 'Chase Wins'],
+      DATA.standings.chase.rows.map((c) => [c.pos, c.car, c.name, c.team, c.seed, c.resetPts, c.chasePts, c.total, c.behind, c.chaseWins])),
+    'standings-teams': () => downloadCsv('team-standings', ['Pos', 'Team', 'Points', 'Behind', 'Wins', 'Top 5s', 'Races'],
+      DATA.standings.teams.map((t) => [t.pos, t.team, t.points, t.behind, t.wins, t.top5, t.races])),
+    'stats-all': () => {
+      const order = (DATA.standings.drivers || []).map((d) => d.custId);
+      const rank = (s) => { const i = order.indexOf(s.custId); return i < 0 ? 1e6 : i; };
+      downloadCsv('driver-stats', STAT_HEAD, (DATA.driverStats || []).slice().sort((x, y) => rank(x) - rank(y)).map(statRow));
+    },
+    'driver-stats': (id) => {
+      const s = (DATA.driverStats || []).find((x) => x.custId === Number(id));
+      if (s) downloadCsv(slug(s.name) + '-season-stats', STAT_HEAD, [statRow(s)]);
+    },
+    'driver-races': (id) => {
+      const d = findDriver(id);
+      if (!d) return;
+      const rows = [];
+      postedRaces().forEach((no) => {
+        const race = DATA.races[no];
+        const x = race.results.find((r) => r.custId === d.custId);
+        rows.push(x ? [raceLabel(no), race.date, race.track, race.segment, x.start, x.fin, x.gain, x.laps, x.led, x.interval, x.inc, x.fastLap,
+          x.status, x.stagePos, x.racePts, x.stagePts, x.bonus, x.total]
+          : [raceLabel(no), race.date, race.track, race.segment, '', 'Did not race']);
+      });
+      downloadCsv(slug(d.name) + '-race-by-race', ['Race', 'Date', 'Track', 'Segment', 'Start', 'Finish', '+/-', 'Laps', 'Led', 'Interval', 'Inc',
+        'Fast Lap', 'Status', 'Stage Pos', 'Race Pts', 'Stage Pts', 'Bonus', 'Total'], rows);
+    },
+    'race': (id) => {
+      const r = DATA.races[id];
+      if (!r) return;
+      downloadCsv(raceLabel(id).toLowerCase() + '-' + slug(r.track) + '-results',
+        ['Fin', 'Start', '+/-', 'Car', 'Driver', 'Team', 'Car Model', 'Laps', 'Led', 'Interval', 'Inc', 'Fast Lap', 'Fast Lap #', 'Avg Lap',
+          'Status', 'Stage Pos', 'Race Pts', 'Stage Pts', 'Bonus', 'Total'],
+        r.results.map((x) => [x.fin, x.start, x.gain, x.car, x.driver, x.team, x.carModel, x.laps, x.led, x.interval, x.inc, x.fastLap, x.fastLapNo,
+          x.avgLap, x.status, x.stagePos, x.racePts, x.stagePts, x.bonus, x.total]));
+    }
+  };
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-export]');
+    if (!btn || !DATA) return;
+    const [kind, id] = btn.dataset.export.split(':');
+    if (EXPORTS[kind]) EXPORTS[kind](id);
+  });
+
   // ------------------------------------------------------------------ shared blocks
   function driversTable(rows, opts) {
     const o = Object.assign({ limit: 0, full: true }, opts);
@@ -307,7 +381,8 @@
       note = (status === 'live' ? 'Full season: every race, regular season and Chase. ' : '') +
         (drops ? `Points after drop weeks (lowest ${drops} regular-season race${drops === 1 ? '' : 's'}${s.chase.on && s.drops.driverChase ? ` and ${s.drops.driverChase} Chase` : ''} dropped). Stage and bonus columns are season totals before drops.` : '');
     }
-    return `<div class="page-head"><div><h1>Standings</h1><div class="sub">${esc(s.name || '')} · after ${plural(s.racesComplete, 'race')}</div></div></div>
+    return `<div class="page-head"><div><h1>Standings</h1><div class="sub">${esc(s.name || '')} · after ${plural(s.racesComplete, 'race')}</div></div>
+      ${exportBtn('standings-' + cur, 'Export CSV')}</div>
       <nav class="seg" aria-label="Standings">${tabs.map((t) => `<a href="#/standings/${t[0]}" class="${t[0] === cur ? 'on' : ''}"${t[0] === cur ? ' aria-current="page"' : ''}>${t[1]}</a>`).join('')}</nav>
       <div class="card">${body}</div>${note ? `<p class="muted" style="font-size:13px;margin-top:10px">${note}</p>` : ''}`;
   }
@@ -377,7 +452,8 @@
     return `<div class="race-nav">${prev ? `<a href="#/race/${esc(prev)}">← ${raceLabel(prev)}</a>` : '<span></span>'}
         <a href="#/schedule">Schedule</a>${next ? `<a href="#/race/${esc(next)}">${raceLabel(next)} →</a>` : '<span></span>'}</div>
       <div class="page-head"><div><div class="eyebrow">${raceLabel(r.race)} · ${shortDate(r.date)}${r.segment === 'Chase' ? ' · The Chase' : r.segment === 'Non-points' ? ' · Non-points' : ''}</div>
-        <h1>${esc(r.track || '')}</h1>${sch && sch.carModel ? `<div class="sub">${esc(sch.carModel)}</div>` : ''}</div></div>
+        <h1>${esc(r.track || '')}</h1>${sch && sch.carModel ? `<div class="sub">${esc(sch.carModel)}</div>` : ''}</div>
+        ${exportBtn('race:' + r.race, 'Export results CSV')}</div>
       <div class="tiles">${tiles.join('')}</div>
       <div class="card"><div class="card-head"><h2>Results</h2></div><div class="table-scroll"><table class="tbl">
         <thead><tr><th class="c">Fin</th><th>#</th><th>Driver</th><th class="d-only">Team</th><th class="c d-only">Start</th><th class="c">+/-</th>
@@ -402,7 +478,8 @@
         <span class="st" style="display:block">${line}${extra}</span></span></a>`;
     }).join('');
     return `<div class="page-head"><div><h1>Drivers</h1><div class="sub">${plural(list.length, 'driver')} · in standings order</div></div>
-      <input id="driver-search" class="search" type="search" placeholder="Search by name, team or number" aria-label="Search drivers"></div>
+      <div class="head-tools"><input id="driver-search" class="search" type="search" placeholder="Search by name, team or number" aria-label="Search drivers">
+      ${exportBtn('stats-all', 'Export all stats')}</div></div>
       <div class="driver-grid">${cards}</div>`;
   }
 
@@ -435,7 +512,8 @@
       <td class="c num">${n(res.start)}</td><td class="c pos"><span class="pb num">${res.fin}</span></td><td class="c num">${res.led}</td><td class="c num">${n(res.inc)}</td>
       <td class="d-only">${n(res.status)}</td><td class="r pts num">${n(res.total)}</td></tr>`).join('');
 
-    return `<div class="race-nav"><a href="#/drivers">← All drivers</a><span></span></div>
+    return `<div class="race-nav"><a href="#/drivers">← All drivers</a><span class="btn-row">${s.custId ? exportBtn('driver-stats:' + d.custId, 'Stats CSV') : ''}
+      ${log.length ? exportBtn('driver-races:' + d.custId, 'Races CSV') : ''}</span></div>
       <div class="d-hero"><div class="big-no" aria-hidden="true">${esc(d.car || '')}</div>
         <h1>${esc(d.name)}</h1><div class="tm">${esc(d.team || '')}${d.car ? ` · #${esc(d.car)}` : ''}</div>
         <div class="chips">${chips.join('')}</div></div>

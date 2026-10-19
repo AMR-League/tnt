@@ -277,3 +277,22 @@ a.row:hover { background: var(--hover); color: var(--text); }
   .d-hero .big-no { font-size: 100px; }
   .sched .row { grid-template-columns: 44px minmax(0, 1fr) auto; padding: 10px 12px; }
 }
+
+/* ---------- Export buttons (v1.3) ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; cursor: pointer; white-space: nowrap;
+  font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+}
+.btn:hover { border-color: var(--red); color: var(--strong); }
+.btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.head-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.race-nav .btn { text-transform: uppercase; }
+@media (max-width: 759px) {
+  .head-tools { width: 100%; }
+  .head-tools .search { flex: 1 1 200px; max-width: none; }
+  .race-nav:has(.btn-row) { flex-direction: column; align-items: flex-start; }
+  .btn-row { justify-content: flex-start; width: 100%; }
+}
+@media (min-width: 760px) { .head-tools { flex-wrap: nowrap; } .head-tools .search { width: 300px; } }
