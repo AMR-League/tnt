@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  const SITE_VERSION = 'v1.1';
+  const SITE_VERSION = 'v1.2';
   const SUPPORTED_SCHEMA = 1;
   let CFG = null;         // config.json
   let DATA = null;        // season data (contract v1)
@@ -441,7 +441,7 @@
         <div class="chips">${chips.join('')}</div></div>
       <div class="card"><div class="card-head"><h2>Season stats</h2></div><div class="stat-grid" style="padding-top:8px">${statsHtml}</div></div>
       <div class="card"><div class="card-head"><h2>Finishes by race</h2></div><div class="finishes">${chipsHtml}</div>
-        <div class="legend"><span><i style="background:var(--red)"></i>Win</span><span><i style="background:#c9d2e6"></i>Top 5</span>
+        <div class="legend"><span><i style="background:var(--red)"></i>Win</span><span><i style="background:var(--t5-bg)"></i>Top 5</span>
         <span><i style="background:var(--raise)"></i>Top 10</span><span><i style="border:1px dashed var(--muted)"></i>Didn't race</span></div></div>
       ${logRows ? `<div class="card"><div class="card-head"><h2>Race by race</h2></div><div class="table-scroll"><table class="tbl">
         <thead><tr><th>Race</th><th>Track</th><th class="d-only">Date</th><th class="c">Start</th><th class="c">Fin</th><th class="c">Led</th><th class="c">Inc</th>
@@ -467,7 +467,28 @@
       <nav class="seg" aria-label="Roster view"><a href="#/roster" class="${byTeam ? '' : 'on'}">By number</a><a href="#/roster/teams" class="${byTeam ? 'on' : ''}">By team</a></nav>${body}`;
   }
 
+  // ------------------------------------------------------------------ theme (dark default, remembered per browser)
+  function setupThemeToggle() {
+    const btn = $('#theme-toggle');
+    if (!btn) return;
+    const sync = () => {
+      const light = document.documentElement.dataset.theme === 'light';
+      const label = light ? 'Switch to dark theme' : 'Switch to light theme';
+      btn.setAttribute('aria-label', label);
+      btn.title = label;
+      btn.setAttribute('aria-pressed', light ? 'true' : 'false');
+    };
+    btn.addEventListener('click', () => {
+      const light = document.documentElement.dataset.theme !== 'light';
+      if (light) document.documentElement.dataset.theme = 'light'; else delete document.documentElement.dataset.theme;
+      try { localStorage.setItem('tnt-theme', light ? 'light' : 'dark'); } catch (e) { /* blocked storage: toggle still works for this visit */ }
+      sync();
+    });
+    sync();
+  }
+
   // ------------------------------------------------------------------ start
+  setupThemeToggle();
   window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
   boot();
 })();
