@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thursday Night Thunder</title>
+<meta name="description" content="Standings, results and schedule for Thursday Night Thunder, an American Motor Racing iRacing league.">
+<meta name="theme-color" content="#0d1e41">
+<link rel="icon" type="image/png" href="assets/tnt-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Archivo+Narrow:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="#/" class="brand" aria-label="Home">
+      <img id="logo" src="assets/tnt-logo.png" alt="Thursday Night Thunder">
+    </a>
+    <nav class="top-nav" aria-label="Main">
+      <a href="#/" data-nav="home">Home</a>
+      <a href="#/standings" data-nav="standings">Standings</a>
+      <a href="#/schedule" data-nav="schedule">Schedule</a>
+      <a href="#/drivers" data-nav="drivers">Drivers</a>
+      <a href="#/roster" data-nav="roster">Roster</a>
+    </nav>
+    <div class="season-pick">
+      <label for="season-select">Season</label>
+      <select id="season-select"></select>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="wrap" tabindex="-1">
+  <p class="loading">Loading the latest standings…</p>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap" id="footer"></div>
+</footer>
+
+<nav class="tab-bar" aria-label="Main">
+  <a href="#/" data-nav="home">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+  <a href="#/standings" data-nav="standings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/></svg>Standings</a>
+  <a href="#/schedule" data-nav="schedule">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Schedule</a>
+  <a href="#/drivers" data-nav="drivers">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Drivers</a>
+  <a href="#/roster" data-nav="roster">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Roster</a>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
