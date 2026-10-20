@@ -8,5 +8,7 @@
   },
   "liveDataUrl": "https://script.google.com/macros/s/AKfycbzCrPBTLTcGNGaSFyqi8mC_4xB1xO4JKASKugTP23k_LORGuE-hb0sjgX9B7Pfq6Izaew/exec",
   "liveSeasonLabel": "Current season",
-  "archivedSeasons": []
+  "archivedSeasons": [
+    { "id": "2026-road-to-cup", "label": "2026 Road To Cup", "file": "seasons/2026-road-to-cup.json" }
+  ]
 }
