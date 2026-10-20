@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  const SITE_VERSION = 'v1.4';
+  const SITE_VERSION = 'v1.5';
   const SUPPORTED_SCHEMA = 1;
   let CFG = null;         // config.json
   let DATA = null;        // season data (contract v1)

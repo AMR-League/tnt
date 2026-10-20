@@ -79,7 +79,9 @@ h1, h2, h3 { font-family: var(--cond); font-weight: 700; letter-spacing: .03em; 
 .season-pick select {
   font: 600 14px 'Barlow', sans-serif; color: #e8ecf5; background: #08132b; border: 1px solid #24365f; border-radius: 6px;
   padding: 8px 10px; min-height: 40px; max-width: 220px;
+  color-scheme: dark; /* the header is navy in both themes, so the dropdown list stays dark too */
 }
+.season-pick option { background: #08132b; color: #e8ecf5; }
 
 /* ---------- Bottom tab bar (phones) ---------- */
 .tab-bar { display: none; }
