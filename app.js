@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  const SITE_VERSION = 'v1.3';
+  const SITE_VERSION = 'v1.4';
   const SUPPORTED_SCHEMA = 1;
   let CFG = null;         // config.json
   let DATA = null;        // season data (contract v1)
@@ -261,21 +261,23 @@
 
   // ------------------------------------------------------------------ shared blocks
   function driversTable(rows, opts) {
-    const o = Object.assign({ limit: 0, full: true }, opts);
+    const o = Object.assign({ limit: 0, full: true, cutoff: 0 }, opts);
     const list = o.limit ? rows.slice(0, o.limit) : rows;
     const seed = S().chase && S().chase.on;
+    const cutRow = `<tr class="cutline"><td colspan="99"><span>Chase cutoff · top ${o.cutoff}</span></td></tr>`;
     return `<div class="table-scroll"><table class="tbl">
       <thead><tr><th class="c">Pos</th><th>#</th><th>Driver</th><th class="d-only">Team</th><th class="r">Pts</th><th class="r">Behind</th>
         ${o.full ? `<th class="c d-only">Wins</th><th class="c d-only">Top 5</th><th class="c d-only">Top 10</th><th class="c d-only">Poles</th>
         <th class="c d-only">Stage</th><th class="c d-only">Bonus</th>${seed ? '<th class="c d-only">Seed</th>' : ''}` : '<th class="c d-only">Wins</th>'}</tr></thead>
-      <tbody>${list.map((d) => `<tr class="${d.pos === 1 ? 'lead' : ''}">
+      <tbody>${list.map((d, i) => `<tr class="${d.pos === 1 ? 'lead' : ''}">
         <td class="c pos"><span class="pb num">${d.pos}</span></td><td>${carTag(d.car)}</td>
         <td class="who">${driverLink(d.name, d.custId)}<span class="team-sub">${esc(d.team || '')}</span></td>
         <td class="d-only">${esc(d.team || '')}</td>
         <td class="r pts num">${d.points}</td><td class="r num">${behind(d.behind)}</td>
         ${o.full ? `<td class="c d-only num">${d.wins}</td><td class="c d-only num">${d.top5}</td><td class="c d-only num">${d.top10}</td>
         <td class="c d-only num">${d.poles}</td><td class="c d-only num">${d.stagePts}</td><td class="c d-only num">${d.bonusPts}</td>
-        ${seed ? `<td class="c d-only num">${n(d.seed)}</td>` : ''}` : `<td class="c d-only num">${d.wins}</td>`}</tr>`).join('')}</tbody></table></div>`;
+        ${seed ? `<td class="c d-only num">${n(d.seed)}</td>` : ''}` : `<td class="c d-only num">${d.wins}</td>`}</tr>${
+        o.cutoff && i === o.cutoff - 1 && list.length > o.cutoff ? cutRow : ''}`).join('')}</tbody></table></div>`;
   }
 
   function chaseTable(rows, opts) {
@@ -332,7 +334,7 @@
     const last = s.lastRace && DATA.races[s.lastRace];
     const chaseLive = status === 'live';
     const mainTitle = chaseLive ? `The Chase · ${s.chase.completed} of ${s.chase.races}` : status === 'projected' ? 'Driver standings · regular season' : 'Driver standings';
-    const mainTable = chaseLive ? chaseTable(st.chase.rows, { compact: true }) : driversTable(st.drivers, { limit: 12, full: false });
+    const mainTable = chaseLive ? chaseTable(st.chase.rows, { compact: true }) : driversTable(st.drivers, { full: false, cutoff: status === 'projected' ? s.chase.fieldSize : 0 });
 
     let lastCard = '';
     if (last) {
