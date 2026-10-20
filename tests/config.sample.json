@@ -1,0 +1,23 @@
+{
+  "siteTitle": "Thursday Night Thunder",
+  "organization": "American Motor Racing",
+  "logo": "assets/tnt-logo.png",
+  "colors": {
+    "primary": "#0d1e41",
+    "accent": "#c5113e"
+  },
+  "liveDataUrl": "live.json",
+  "liveSeasonLabel": "Current season",
+  "archivedSeasons": [
+    {
+      "id": "2026-summer",
+      "label": "2026 Summer Series",
+      "file": "seasons/2026-summer.json"
+    },
+    {
+      "id": "offseason",
+      "label": "Offseason (no Chase)",
+      "file": "off.json"
+    }
+  ]
+}
