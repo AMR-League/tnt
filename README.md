@@ -3,7 +3,7 @@
 The public website for American Motor Racing's **Thursday Night Thunder** iRacing league:
 standings, the Chase, race results, schedule, driver pages and the roster, laid out for both phones and desktops.
 
-**Live site:** https://amr-league.github.io/TNT/
+**Live site:** https://amr-league.github.io/tnt/
 
 The points themselves are still run in the league's Google Sheet (League Tools). This site only *reads* that data, so nothing here affects scoring.
 

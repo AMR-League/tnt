@@ -1,6 +1,6 @@
 # CLAUDE.md — TNT website
 
-Public website for American Motor Racing's **Thursday Night Thunder** iRacing league: `https://amr-league.github.io/TNT/` (GitHub Pages, main / root). It only **reads** data. Points are run in the league's Google Sheet by League Tools (repo `AMR-League/league-tools`), which serves a JSON feed from its web app.
+Public website for American Motor Racing's **Thursday Night Thunder** iRacing league: `https://amr-league.github.io/tnt/` (GitHub Pages, main / root). It only **reads** data. Points are run in the league's Google Sheet by League Tools (repo `AMR-League/league-tools`), which serves a JSON feed from its web app.
 
 ## Working with Marty (owner)
 - Ask clarifying questions before building non-trivial changes; for visual changes, mock up first when the direction is unclear.
